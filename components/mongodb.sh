@@ -4,13 +4,7 @@ systemctl enable mongod
 systemctl start mongod
 
 
-#1. Update Listen IP address from 127.0.0.1 to 0.0.0.0 in config file
-#
-#Config file: `/etc/mongod.conf`
-#
-#then restart the service
-vim /etc/mongod.conf
-
+sed -i -e 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
 systemctl restart mongod
 curl -s -L -o /tmp/mongodb.zip "https://github.com/roboshop-devops-project/mongodb/archive/main.zip"
 
