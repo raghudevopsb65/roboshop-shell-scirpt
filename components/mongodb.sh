@@ -9,6 +9,7 @@ systemctl start mongod
 #Config file: `/etc/mongod.conf`
 #
 #then restart the service
+vim /etc/mongod.conf
 
 systemctl restart mongod
 curl -s -L -o /tmp/mongodb.zip "https://github.com/roboshop-devops-project/mongodb/archive/main.zip"
