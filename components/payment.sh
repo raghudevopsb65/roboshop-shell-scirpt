@@ -12,14 +12,9 @@ USER_ID=$(id -u roboshop)
 GROUP_ID=$(id -g roboshop)
 
 sed -i -e "/^uid/ c uid = ${USER_ID}" -e "/^gid/ c gid = ${GROUP_ID}" /home/roboshop/payment/payment.ini
+sed -i -e 's/CARTHOST/cart.roboshop.internal/' -e 's/USERHOST/user.roboshop.internal/' /home/roboshop/payment/systemd.service
 
-#1. Update the roboshop user and group id in `payment.ini` file.
-#2. Update SystemD service file
-#
-#    Update `CARTHOST` with cart server ip
-#
-#    Update `USERHOST` with user server ip
-#
-#    Update `AMQPHOST` with RabbitMQ server ip.
-#
-#3. Setup the service
+mv /home/roboshop/payment/systemd.service /etc/systemd/system/payment.service
+systemctl daemon-reload
+systemctl enable payment
+systemctl restart payment
