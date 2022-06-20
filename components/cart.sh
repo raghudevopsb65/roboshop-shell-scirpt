@@ -4,12 +4,7 @@ CHECK_ROOT
 
 echo "Setting Up NodeJS YUM Repo is "
 curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${LOG}
-if [ $? -ne 0 ]; then
-  echo FAILED
-  exit 2
-else
-  echo SUCCESS
-fi
+CHECK_STAT $?
 
 yum install nodejs -y
 useradd roboshop
