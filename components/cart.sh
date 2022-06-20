@@ -2,7 +2,7 @@ source components/common.sh
 
 CHECK_ROOT
 
-echo "Setting Up NodeJS YUM Repo"
+PRINT "Setting Up NodeJS YUM Repo"
 curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${LOG}
 CHECK_STAT $?
 
