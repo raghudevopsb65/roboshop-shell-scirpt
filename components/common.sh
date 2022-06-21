@@ -129,5 +129,5 @@ MAVEN() {
   mv ${COMPONENT}-main ${COMPONENT} && cd ${COMPONENT} && mvn clean package &>>${LOG} && mv target/${COMPONENT}-1.0.jar ${COMPONENT}.jar
   CHECK_STAT $?
 
-  SYETEMD
+  SYSTEMD
 }
