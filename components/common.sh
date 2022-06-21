@@ -25,18 +25,7 @@ PRINT() {
   echo "$1"
 }
 
-NODEJS() {
-
-  CHECK_ROOT
-
-  PRINT "Setting Up NodeJS YUM Repo"
-  curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${LOG}
-  CHECK_STAT $?
-
-  PRINT "Installing NodeJS"
-  yum install nodejs -y &>>${LOG}
-  CHECK_STAT $?
-
+APP_COMMON_SETUP() {
   PRINT "Creating Application User"
   id roboshop &>>${LOG}
   if [ $? -ne 0 ]; then
@@ -57,14 +46,9 @@ NODEJS() {
   PRINT "Extract ${COMPONENT} Content"
   unzip /tmp/${COMPONENT}.zip &>>${LOG}
   CHECK_STAT $?
+}
 
-  mv ${COMPONENT}-main ${COMPONENT}
-  cd ${COMPONENT}
-
-  PRINT "Install NodeJS Dependencies for ${COMPONENT} Component"
-  npm install &>>${LOG}
-  CHECK_STAT $?
-
+SYSTEMD() {
   PRINT "Update SystemD Configuration"
   sed -i -e 's/REDIS_ENDPOINT/redis.roboshop.internal/' -e 's/CATALOGUE_ENDPOINT/catalogue.roboshop.internal/' -e 's/MONGO_ENDPOINT/mongodb.roboshop.internal/' -e 's/MONGO_DNSNAME/mongodb.roboshop.internal/' /home/roboshop/${COMPONENT}/systemd.service &>>${LOG}
   CHECK_STAT $?
@@ -76,7 +60,27 @@ NODEJS() {
   PRINT "Start ${COMPONENT} Service"
   systemctl enable ${COMPONENT} &>>${LOG} && systemctl restart ${COMPONENT} &>>${LOG}
   CHECK_STAT $?
+}
 
+NODEJS() {
+
+  CHECK_ROOT
+
+  PRINT "Setting Up NodeJS YUM Repo"
+  curl -sL https://rpm.nodesource.com/setup_lts.x | bash &>>${LOG}
+  CHECK_STAT $?
+
+  PRINT "Installing NodeJS"
+  yum install nodejs -y &>>${LOG}
+  CHECK_STAT $?
+
+  APP_COMMON_SETUP
+
+  PRINT "Install NodeJS Dependencies for ${COMPONENT} Component"
+  mv ${COMPONENT}-main ${COMPONENT} && cd ${COMPONENT} && npm install &>>${LOG}
+  CHECK_STAT $?
+
+  SYSTEMD
 }
 
 NGINX() {
@@ -109,4 +113,21 @@ NGINX() {
   PRINT "Start Nginx Service"
   systemctl enable nginx &>>${LOG} && systemctl restart nginx &>>${LOG}
   CHECK_STAT $?
+}
+
+MAVEN() {
+
+  CHECK_ROOT
+
+  PRINT "Installing Maven"
+  yum install maven -y &>>${LOG}
+  CHECK_STAT $?
+
+  APP_COMMON_SETUP
+
+  PRINT "Compile ${COMPONENT} Code"
+  mv ${COMPONENT}-main ${COMPONENT} && cd ${COMPONENT} && mvn clean package &>>${LOG} && mv target/${COMPONENT}-1.0.jar ${COMPONENT}.jar
+  CHECK_STAT $?
+
+  SYETEMD
 }
