@@ -95,7 +95,7 @@ NGINX() {
   CHECK_STAT $?
 
   PRINT "Extract ${COMPONENT} Content"
-  unzip /tmp/${COMPONENT}.zip
+  unzip /tmp/${COMPONENT}.zip &>>${LOG}
   CHECK_STAT $?
 
   PRINT "Organize ${COMPONENT} Content"
