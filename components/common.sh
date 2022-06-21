@@ -70,15 +70,43 @@ NODEJS() {
   CHECK_STAT $?
 
   PRINT "Setup SystemD Configuration"
-  mv /home/roboshop/${COMPONENT}/systemd.service /etc/systemd/system/${COMPONENT}.service &>>${LOG}
+  mv /home/roboshop/${COMPONENT}/systemd.service /etc/systemd/system/${COMPONENT}.service &>>${LOG} && systemctl daemon-reload
   CHECK_STAT $?
 
-  systemctl daemon-reload
-  systemctl enable ${COMPONENT} &>>${LOG}
-
   PRINT "Start ${COMPONENT} Service"
-  systemctl restart ${COMPONENT} &>>${LOG}
+  systemctl enable ${COMPONENT} &>>${LOG} && systemctl restart ${COMPONENT} &>>${LOG}
   CHECK_STAT $?
 
 }
 
+NGINX() {
+  CHECK_ROOT
+  PRINT "Installing Nginx"
+  yum install nginx -y &>>${LOG}
+  CHECK_STAT $?
+
+  PRINT "Download ${COMPONENT} Content"
+  curl -s -L -o /tmp/${COMPONENT}.zip "https://github.com/roboshop-devops-project/${COMPONENT}/archive/main.zip" &>>${LOG}
+  CHECK_STAT $?
+
+  PRINT "Clean OLD Content"
+  cd /usr/share/nginx/html
+  rm -rf * &>>${LOG}
+  CHECK_STAT $?
+
+  PRINT "Extract ${COMPONENT} Content"
+  unzip /tmp/${COMPONENT}.zip
+  CHECK_STAT $?
+
+  PRINT "Organize ${COMPONENT} Content"
+  mv ${COMPONENT}-main/* . && mv static/* . && rm -rf ${COMPONENT}-main README.md && mv localhost.conf /etc/nginx/default.d/roboshop.conf
+  CHECK_STAT $?
+
+  PRINT "Update ${COMPONENT} Configuration"
+  sed -i -e '/catalogue/ s/localhost/catalogue.roboshop.internal/' -e '/user/ s/localhost/user.roboshop.internal/' -e '/cart/ s/localhost/cart.roboshop.internal/' -e '/payment/ s/localhost/payment.roboshop.internal/' -e '/shipping/ s/localhost/shipping.roboshop.internal/' /etc/nginx/default.d/roboshop.conf
+  CHECK_STAT $?
+
+  PRINT "Start Nginx Service"
+  systemctl enable nginx &>>${LOG} && systemctl restart nginx &>>${LOG}
+  CHECK_STAT $?
+}
