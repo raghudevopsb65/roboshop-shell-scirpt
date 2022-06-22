@@ -106,8 +106,10 @@ NGINX() {
   mv ${COMPONENT}-main/* . && mv static/* . && rm -rf ${COMPONENT}-main README.md && mv localhost.conf /etc/nginx/default.d/roboshop.conf
   CHECK_STAT $?
 
-  PRINT "Update ${COMPONENT} Configuration"
-  sed -i -e '/catalogue/ s/localhost/catalogue.roboshop.internal/' -e '/user/ s/localhost/user.roboshop.internal/' -e '/cart/ s/localhost/cart.roboshop.internal/' -e '/payment/ s/localhost/payment.roboshop.internal/' -e '/shipping/ s/localhost/shipping.roboshop.internal/' /etc/nginx/default.d/roboshop.conf
+  for backend in catalogue cart user shipping payment ; do
+  PRINT "Update Configuration for $backend "
+  # Commented this as part of loop demo, However this single sed command is much better than loop approach
+  # sed -i -e '/catalogue/ s/localhost/catalogue.roboshop.internal/' -e '/user/ s/localhost/user.roboshop.internal/' -e '/cart/ s/localhost/cart.roboshop.internal/' -e '/payment/ s/localhost/payment.roboshop.internal/' -e '/shipping/ s/localhost/shipping.roboshop.internal/' /etc/nginx/default.d/roboshop.conf
   CHECK_STAT $?
 
   PRINT "Start Nginx Service"
